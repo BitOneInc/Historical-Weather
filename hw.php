@@ -9,6 +9,7 @@ Author URI: http://www.blackreit.com
 */
 add_shortcode('hw','wunderground_history');
 function wunderground_history( $atts ) { // ($city, $state, $year, $month, $day) {
+  wp_enqueue_style('weatherformat', plugins_url('css/weatherformat.css', __FILE__));
   wp_enqueue_style('weatherfont', plugins_url('css/weather-icons.css', __FILE__));
   extract( shortcode_atts( array(
     'city' => 'New_York',
@@ -21,27 +22,38 @@ function wunderground_history( $atts ) { // ($city, $state, $year, $month, $day)
   $parsed_json = json_decode($json_string);
   $dailysummary = $parsed_json->{'history'}->{'dailysummary'}[0];
   $observations = $parsed_json->{'history'}->{'observations'};
-
-  foreach ($observations as $observation) {
-    $date = $observation->{'date'};
-    echo $date->{'pretty'}.': '.wunderground_to_icon($observation->{'conds'}).'<br>';
+  $obsarray = array();
+  for ($i = 1; $i <= 3; $i++) {
+    array_push($obsarray, $observations[count($observations) * $i / 4]);
   }
 
-  echo '<p class="fonts-wi">Test</p><br>';
-  echo 'Temperature Range: [' . $dailysummary->{'mintempi'} . ',' . $dailysummary->{'maxtempi'} . ']<br>';
-  echo 'Avg. Wind Speed: ' . $dailysummary->{'meanwindspdi'} . ' mph<br>';
-  echo 'Avg. Visibility: ' . $dailysummary->{'meanvisi'} . ' miles<br>';
-  if(strcmp($dailysummary->{'rain'}, "1") == 0)
-  {
-    echo 'Rainfall: ' . $dailysummary->{'precipi'} . '<br>';
+  echo '<div class="weatherformat">';
+
+  foreach ($obsarray as $obs) {
+    echo '<div class="col-1-3">'.$obs->{'date'}->{'pretty'}.'<br><br>'.wunderground_to_icon($obs->{'conds'}, 72).'<br><br>'.$obs->{'conds'}.'</div>';
   }
-  if(strcmp($dailysummary->{'snow'}, "1") == 0)
-  {
-    echo 'Snowfall: ' . $dailysummary->{'snowfalli'} . '<br>';
+
+  echo '<div class="wf-content">';
+  echo '<div class="col-1-3">Temperature Range: [' . $dailysummary->{'mintempi'} . ',' . $dailysummary->{'maxtempi'} . ']</div>';
+  echo '<div class="col-1-3">Avg. Wind Speed: <br>' . $dailysummary->{'meanwindspdi'} . ' mph</div>';
+  echo '<div class="col-1-3">Avg. Visibility: <br>' . $dailysummary->{'meanvisi'} . ' miles</div>';
+  if(strcmp($dailysummary->{'rain'}, "1") == 0) {
+    if(strcmp($dailysummary->{'snow'}, "1") == 0) {
+      echo '<div class="col-1-2">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
+      echo '<div class="col-1-2">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+    } else {
+      echo '<div class="col-1-1">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
+    }
+  } else {
+    if(strcmp($dailysummary->{'snow'}, "1") == 0) {
+      echo '<div class="col-1-1">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+    }
   }
+  
+  echo '</div></div>';
 }
 
-function wunderground_to_icon( $status ) {
+function wunderground_to_icon( $status, $size ) {
   if (strncmp($status, 'Light', 5) == 0 || strncmp($status, 'Heavy', 5) == 0) {
       $status = substr($status, 6);
   }
@@ -100,7 +112,7 @@ function wunderground_to_icon( $status ) {
     'Unknown Precipitation' => 'wi-day-rain',
     'Unknown' => 'wi-day-sunny'
   );
-  return '<i class="wi '.$icons[$status].'"></i>';
+  return '<i style="font-size: '.$size.'px;" class="wi '.$icons[$status].'"></i>';
 }
 
 function months( $month_id ) {
@@ -119,4 +131,13 @@ function months( $month_id ) {
     12 => 'December'
   );
   return $months[$month_id];
+}
+
+function Quartile($Array, $Quartile) {
+  $pos = (count($Array) - 1) * $Quartile;
+ 
+  $base = floor($pos);
+  $rest = $pos - $base;
+ 
+  return $Array[$base];
 }
