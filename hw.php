@@ -7,31 +7,6 @@ Author: Matthew M. Emma
 Version: 1.0
 Author URI: http://www.blackreit.com
 */
-<<<<<<< HEAD
-=======
-add_shortcode('hw','wunderground_history');
-function wunderground_history( $atts ) { // ($city, $state, $year, $month, $day) {
-  wp_register_style( 'weatherformat', plugins_url('css/weatherformat.css', __FILE__) );
-  wp_enqueue_style( 'weatherformat' );
-  wp_register_style( 'weatherfont', plugins_url('css/weather-icons.css', __FILE__) );
-  wp_enqueue_style( 'weatherfont' );
-  extract( shortcode_atts( array(
-    'city' => 'New_York',
-    'state' => 'NY',
-    'y' => '1986',
-    'm' => '11',
-    'd' => '27'
-  ), $atts, 'hw' ) );
-  $json_string = file_get_contents('http://api.wunderground.com/api/b8e924a8f008b81e/history_' . $y . $m . $d . '/q/' . $state . '/' . $city . '.json');
-  $parsed_json = json_decode($json_string);
-  $dailysummary = $parsed_json->{'history'}->{'dailysummary'}[0];
-  $observations = $parsed_json->{'history'}->{'observations'};
-  $obsarray = array();
-  for ($i = 1; $i <= 3; $i++) {
-    array_push($obsarray, $observations[count($observations) * $i / 4]);
-  }
->>>>>>> 5a791168d846e4c59c1113b4f778f5a13ebfa017
-
 $WPWunderground = new Wunderground();
 
 class Wunderground {
