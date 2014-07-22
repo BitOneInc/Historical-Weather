@@ -9,8 +9,10 @@ Author URI: http://www.blackreit.com
 */
 add_shortcode('hw','wunderground_history');
 function wunderground_history( $atts ) { // ($city, $state, $year, $month, $day) {
-  wp_enqueue_style('weatherformat', plugins_url('css/weatherformat.css', __FILE__));
-  wp_enqueue_style('weatherfont', plugins_url('css/weather-icons.css', __FILE__));
+  wp_register_style( 'weatherformat', plugins_url('css/weatherformat.css', __FILE__) );
+  wp_enqueue_style( 'weatherformat' );
+  wp_register_style( 'weatherfont', plugins_url('css/weather-icons.css', __FILE__) );
+  wp_enqueue_style( 'weatherfont' );
   extract( shortcode_atts( array(
     'city' => 'New_York',
     'state' => 'NY',
