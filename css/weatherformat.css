@@ -48,9 +48,7 @@ div.weatherformat div.wf-content {
 }
 
 [class*='col-'] {
-	background-color: #67C8FF;
 	float: left;
-	border: 1px solid black;
 	padding: 10px;
 	text-align: center;
 	-webkit-box-sizing: border-box;

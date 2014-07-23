@@ -7,7 +7,7 @@ Author: Matthew M. Emma
 Version: 1.0
 Author URI: http://www.blackreit.com
 */
-$WPHistoricalWunderground = new Wunderground();
+$WPHistoricalWunderground = new HistoricalWunderground();
 
 class HistoricalWunderground {
 
