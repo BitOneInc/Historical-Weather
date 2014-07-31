@@ -16,7 +16,9 @@ class HistoricalWunderground {
   }
 
   public function wunderground_history( $atts ) { // ($city, $state, $year, $month, $day) {
-    wp_enqueue_style('weatherformat', plugins_url('css/weatherformat.css', __FILE__));
+    if (!wp_style_is('bootstrap')){
+      wp_enqueue_style('weatherformat', plugins_url('css/weatherformat.css', __FILE__));
+    }
     wp_enqueue_style('weatherfont', plugins_url('css/weather-icons.css', __FILE__));
     extract( shortcode_atts( array(
       'city' => 'New_York',
@@ -38,31 +40,62 @@ class HistoricalWunderground {
         $hourSearch += 6;
       }
     }
-  
-    echo '<div class="weatherformat">';
-  
-    foreach ($obsarray as $obs) {
-      echo '<div class="col-1-'.count($obsarray).'">'.str_replace(' on ', '<br>', $obs->{'date'}->{'pretty'}).'<br><br>'.$this->wunderground_to_history_icon($obs->{'conds'}, 72).'<br><br>'.$obs->{'conds'}.'</div>';
-    }
-  
-    echo '<div class="wf-content">';
-    echo '<div class="col-1-3">Temperature <br>Range: [' . $dailysummary->{'mintempi'} . ',' . $dailysummary->{'maxtempi'} . ']</div>';
-    echo '<div class="col-1-3">Avg. Wind Speed: <br>' . $dailysummary->{'meanwindspdi'} . ' mph</div>';
-    echo '<div class="col-1-3">Avg. Visibility: <br>' . $dailysummary->{'meanvisi'} . ' miles</div>';
-    if(strcmp($dailysummary->{'rain'}, "1") == 0) {
-      if(strcmp($dailysummary->{'snow'}, "1") == 0) {
-        echo '<div class="col-1-2">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
-        echo '<div class="col-1-2">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+    if (wp_style_is('bootstrap')){
+      echo '<div class="row">';
+      foreach ($obsarray as $obs) {
+        echo '<div class="col-md-'.$cols = floor(12 / count($obsarray) ).'">'.str_replace(' on ', '<br>', $obs->{'date'}->{'pretty'}).'<br><br>'.$this->wunderground_to_history_icon($obs->{'conds'}, 72).'<br><br>'.$obs->{'conds'}.'</div>';
+      }
+      echo '</div>';
+
+      echo '<div class="row">';
+      echo '<div class="col-md-4">Temperature <br>Range: [' . $dailysummary->{'mintempi'} . ',' . $dailysummary->{'maxtempi'} . ']</div>';
+      echo '<div class="col-md-4">Avg. Wind Speed: <br>' . $dailysummary->{'meanwindspdi'} . ' mph</div>';
+      echo '<div class="col-md-4">Avg. Visibility: <br>' . $dailysummary->{'meanvisi'} . ' miles</div>';
+      echo '</div>';
+
+      if(strcmp($dailysummary->{'rain'}, "1") == 0) {
+        if(strcmp($dailysummary->{'snow'}, "1") == 0) {
+          echo '<div class="row">';
+          echo '<div class="col-md-6">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
+          echo '<div class="col-md-6">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+          echo '</div>';
+        } else {
+          echo '<div class="row">';
+          echo '<div class="col-md-12">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
+          echo '</div>';
+        }
       } else {
-        echo '<div class="col-1-1">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
+        if(strcmp($dailysummary->{'snow'}, "1") == 0) {
+          echo '<div class="row">';
+          echo '<div class="col-1-1">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+          echo '</div>';
+        }
       }
+
     } else {
-      if(strcmp($dailysummary->{'snow'}, "1") == 0) {
-        echo '<div class="col-1-1">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+
+      echo '<div class="weatherformat">';
+      foreach ($obsarray as $obs) {
+        echo '<div class="col-1-'.count($obsarray).'">'.str_replace(' on ', '<br>', $obs->{'date'}->{'pretty'}).'<br><br>'.$this->wunderground_to_history_icon($obs->{'conds'}, 72).'<br><br>'.$obs->{'conds'}.'</div>';
       }
+      echo '<div class="wf-content">';
+      echo '<div class="col-1-3">Temperature <br>Range: [' . $dailysummary->{'mintempi'} . ',' . $dailysummary->{'maxtempi'} . ']</div>';
+      echo '<div class="col-1-3">Avg. Wind Speed: <br>' . $dailysummary->{'meanwindspdi'} . ' mph</div>';
+      echo '<div class="col-1-3">Avg. Visibility: <br>' . $dailysummary->{'meanvisi'} . ' miles</div>';
+      if(strcmp($dailysummary->{'rain'}, "1") == 0) {
+        if(strcmp($dailysummary->{'snow'}, "1") == 0) {
+          echo '<div class="col-1-2">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
+          echo '<div class="col-1-2">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+        } else {
+          echo '<div class="col-1-1">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
+        }
+      } else {
+        if(strcmp($dailysummary->{'snow'}, "1") == 0) {
+          echo '<div class="col-1-1">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+        }
+      }
+      echo '</div></div>';
     }
-    
-    echo '</div></div>';
   }
 
   private function wunderground_to_history_icon( $status, $size ) {
