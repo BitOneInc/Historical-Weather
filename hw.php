@@ -7,7 +7,6 @@ Author: Matthew M. Emma
 Version: 1.0
 Author URI: http://www.blackreit.com
 */
-$WPHistoricalWunderground = new HistoricalWunderground();
 
 class HistoricalWunderground {
 
@@ -16,16 +15,17 @@ class HistoricalWunderground {
   }
 
   public function wunderground_history( $atts ) { // ($city, $state, $year, $month, $day) {
-    if (!wp_style_is('bootstrap')){
-      wp_enqueue_style('weatherformat', plugins_url('css/weatherformat.css', __FILE__));
-    }
-    wp_enqueue_style('weatherfont', plugins_url('css/weather-icons.css', __FILE__));
+    wp_deregister_style( 'weatherfont' );
+    wp_register_style( 'weatherfont', get_template_directory_uri(). '/includes/plugins/weatherforecast/css/weather-icons.css' );
+    wp_enqueue_style( 'weatherfont' );
     extract( shortcode_atts( array(
       'city' => 'New_York',
       'state' => 'NY',
       'y' => '1986',
       'm' => '11',
-      'd' => '27'
+      'd' => '27',
+      'icon' => 72,
+      'deg' => 'F'
     ), $atts, 'hw' ) );
     $json_string = file_get_contents('http://api.wunderground.com/api/b8e924a8f008b81e/history_' . $y . $m . $d . '/q/' . $state . '/' . $city . '.json');
     $parsed_json = json_decode($json_string);
@@ -40,62 +40,46 @@ class HistoricalWunderground {
         $hourSearch += 6;
       }
     }
-    if (wp_style_is('bootstrap')){
-      echo '<div class="row">';
-      foreach ($obsarray as $obs) {
-        echo '<div class="col-md-'.$cols = floor(12 / count($obsarray) ).'">'.str_replace(' on ', '<br>', $obs->{'date'}->{'pretty'}).'<br><br>'.$this->wunderground_to_history_icon($obs->{'conds'}, 72).'<br><br>'.$obs->{'conds'}.'</div>';
-      }
-      echo '</div>';
-
-      echo '<div class="row">';
-      echo '<div class="col-md-4">Temperature <br>Range: [' . $dailysummary->{'mintempi'} . ',' . $dailysummary->{'maxtempi'} . ']</div>';
-      echo '<div class="col-md-4">Avg. Wind Speed: <br>' . $dailysummary->{'meanwindspdi'} . ' mph</div>';
-      echo '<div class="col-md-4">Avg. Visibility: <br>' . $dailysummary->{'meanvisi'} . ' miles</div>';
-      echo '</div>';
-
-      if(strcmp($dailysummary->{'rain'}, "1") == 0) {
-        if(strcmp($dailysummary->{'snow'}, "1") == 0) {
-          echo '<div class="row">';
-          echo '<div class="col-md-6">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
-          echo '<div class="col-md-6">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
-          echo '</div>';
-        } else {
-          echo '<div class="row">';
-          echo '<div class="col-md-12">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
-          echo '</div>';
-        }
-      } else {
-        if(strcmp($dailysummary->{'snow'}, "1") == 0) {
-          echo '<div class="row">';
-          echo '<div class="col-1-1">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
-          echo '</div>';
-        }
-      }
-
-    } else {
-
-      echo '<div class="weatherformat">';
-      foreach ($obsarray as $obs) {
-        echo '<div class="col-1-'.count($obsarray).'">'.str_replace(' on ', '<br>', $obs->{'date'}->{'pretty'}).'<br><br>'.$this->wunderground_to_history_icon($obs->{'conds'}, 72).'<br><br>'.$obs->{'conds'}.'</div>';
-      }
-      echo '<div class="wf-content">';
-      echo '<div class="col-1-3">Temperature <br>Range: [' . $dailysummary->{'mintempi'} . ',' . $dailysummary->{'maxtempi'} . ']</div>';
-      echo '<div class="col-1-3">Avg. Wind Speed: <br>' . $dailysummary->{'meanwindspdi'} . ' mph</div>';
-      echo '<div class="col-1-3">Avg. Visibility: <br>' . $dailysummary->{'meanvisi'} . ' miles</div>';
-      if(strcmp($dailysummary->{'rain'}, "1") == 0) {
-        if(strcmp($dailysummary->{'snow'}, "1") == 0) {
-          echo '<div class="col-1-2">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
-          echo '<div class="col-1-2">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
-        } else {
-          echo '<div class="col-1-1">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
-        }
-      } else {
-        if(strcmp($dailysummary->{'snow'}, "1") == 0) {
-          echo '<div class="col-1-1">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
-        }
-      }
-      echo '</div></div>';
+  
+    $weatherunit = '<div class="historicalweather"><div class="wgroup">';
+  
+    foreach ($obsarray as $obs) {
+      $cols = floor(100 / count($obsarray) );
+      $weatherunit .= '<div class="time" style="float: left; text-align: center; width: '.$cols.'%">'
+      .str_replace(' on ', '<br>', $obs->{'date'}->{'pretty'}).'<br><br>'
+      .$this->wunderground_to_history_icon($obs->{'conds'}, $icon)
+      .'<br><br>'.$obs->{'conds'}.'</div>';
     }
+
+    if ($deg ==='F'){
+      $temperature = 'Low: ' . $dailysummary->{'mintempi'} . '&deg;F, High: ' . $dailysummary->{'maxtempi'} . '&deg;F';
+    }
+
+    if ($deg ==='C'){
+      $temperature = 'Low: ' . $dailysummary->{'mintempm'} . '&deg;C, High: ' . $dailysummary->{'maxtempm'} . '&deg;C';
+    }
+
+    $weatherunit .= '</div><div class="wgroup"><hr>
+    <div class="tsv" style="float: left; text-align: center; width: 33.3%"><strong>Temperature</strong><br>'.$temperature .'</div>
+    <div class="tsv" style="float: left; text-align: center; width: 33.4%">Avg. Wind Speed: ' . $dailysummary->{'meanwindspdi'} . ' mph</div>
+    <div class="tsv" style="float: left; text-align: center; width: 33.3%">Avg. Visibility: ' . $dailysummary->{'meanvisi'} . ' miles</div>
+    </div>';
+    
+    if(strcmp($dailysummary->{'rain'}, "1") == 0) {
+      if(strcmp($dailysummary->{'snow'}, "1") == 0) {
+        $weatherunit .= '<div class="rainsnow" style="float: left; text-align: center; width: 50%">Rainfall: ' . $dailysummary->{'precipi'} . '</div>
+        <div class="rainsnow" style="float: left; text-align: center; width: 50%">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+      } else {
+        $weatherunit .= '<div class="rain" style="text-align: center">Rainfall: ' . $dailysummary->{'precipi'} . '</div>';
+      }
+    } else {
+      if(strcmp($dailysummary->{'snow'}, "1") == 0) {
+        $weatherunit .= '<div class="snow" style="text-align: center">Snowfall: ' . $dailysummary->{'snowfalli'} . '</div>';
+      }
+    }
+    
+    $weatherunit .= '</div>';
+    return $weatherunit;
   }
 
   private function wunderground_to_history_icon( $status, $size ) {
@@ -160,3 +144,11 @@ class HistoricalWunderground {
     return '<i style="font-size: '.$size.'px;" class="wi '.$icons[$status].'"></i>';
   }
 }
+
+function init_HistoricalWunderground() {
+  if(method_exists('HistoricalWunderground', 'wunderground_history')) {
+    $WPHistoricalWunderground = new HistoricalWunderground();
+  }
+}
+
+add_action('wp_loaded', 'init_HistoricalWunderground');
