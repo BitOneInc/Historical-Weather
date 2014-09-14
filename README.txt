@@ -25,7 +25,9 @@ Please collaborate on issues and questions through Github:
 https://github.com/TurnereManager/Historical-Weather
 
 == Screenshots ==
-1. screenshoturl.jpg
+1. https://github.com/TurnereManager/Historical-Weather/blob/master/inline.png
+2. https://github.com/TurnereManager/Historical-Weather/blob/master/historical.PNG
+3. https://github.com/TurnereManager/Historical-Weather/blob/master/thumbnail.png
 
 == Changelog ==
 - 2014-08-15 - Initial Release
