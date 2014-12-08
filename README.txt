@@ -3,8 +3,10 @@ Contributors: Matthew M. Emma, Robert Carmosino
 Tags: weather, wunderground, historical
 Requires at least: 4.0
 Tested up to: 4.0
-License: Attribution 4.0 International (CC BY 4.0)
-License URI: http://creativecommons.org/licenses/by/4.0/
+Stable tag: trunk
+License: GPLv3
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
+Donate link: http://www.wunderground.com/weather/api/
 
 Historical Weather plugin for wordpress using Wunderground API.
 
@@ -31,3 +33,7 @@ https://github.com/TurnereManager/Historical-Weather
 
 == Changelog ==
 - 2014-08-15 - Initial Release
+
+== Upgrade Notice ==
+= 1.0 =
+Initial Commit
